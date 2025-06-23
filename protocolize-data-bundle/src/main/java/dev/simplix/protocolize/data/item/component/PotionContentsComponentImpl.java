@@ -1,16 +1,15 @@
 package dev.simplix.protocolize.data.item.component;
 
 import dev.simplix.protocolize.api.Protocolize;
-import dev.simplix.protocolize.api.item.MobEffectInstance;
 import dev.simplix.protocolize.api.item.component.PotionContentsComponent;
-import dev.simplix.protocolize.api.item.component.StructuredComponentType;
+import dev.simplix.protocolize.api.item.component.DataComponentType;
+import dev.simplix.protocolize.api.item.objects.MobEffectInstance;
 import dev.simplix.protocolize.api.mapping.ProtocolIdMapping;
 import dev.simplix.protocolize.api.mapping.ProtocolMapping;
 import dev.simplix.protocolize.api.providers.MappingProvider;
 import dev.simplix.protocolize.api.util.ProtocolUtil;
-import dev.simplix.protocolize.data.MobEffect;
 import dev.simplix.protocolize.data.Potion;
-import dev.simplix.protocolize.data.util.StructuredComponentUtil;
+import dev.simplix.protocolize.data.util.DataComponentUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -43,7 +42,7 @@ public class PotionContentsComponentImpl implements PotionContentsComponent {
         }
         int count = ProtocolUtil.readVarInt(byteBuf);
         for (int i = 0; i < count; i++) {
-            customEffects.add(StructuredComponentUtil.readMobEffectInstance(byteBuf, protocolVersion));
+            customEffects.add(DataComponentUtil.readMobEffectInstance(byteBuf, protocolVersion));
         }
         if(protocolVersion >= MINECRAFT_1_21_2) {
             if (byteBuf.readBoolean()) {
@@ -58,7 +57,7 @@ public class PotionContentsComponentImpl implements PotionContentsComponent {
         if(potion != null) {
             ProtocolMapping mapping = MAPPING_PROVIDER.mapping(potion, protocolVersion);
             if (!(mapping instanceof ProtocolIdMapping)) {
-                StructuredComponentUtil.logMappingWarning(potion.name(), protocolVersion);
+                DataComponentUtil.logMappingWarning(potion.name(), protocolVersion);
                 ProtocolUtil.writeVarInt(byteBuf, 0);
             } else {
                 ProtocolUtil.writeVarInt(byteBuf, ((ProtocolIdMapping) mapping).id());
@@ -70,7 +69,7 @@ public class PotionContentsComponentImpl implements PotionContentsComponent {
         }
         ProtocolUtil.writeVarInt(byteBuf, customEffects.size());
         for (MobEffectInstance effect : customEffects) {
-            StructuredComponentUtil.writeMobEffectInstance(byteBuf, effect, protocolVersion);
+            DataComponentUtil.writeMobEffectInstance(byteBuf, protocolVersion, effect);
         }
         if(protocolVersion >= MINECRAFT_1_21_2) {
             byteBuf.writeBoolean(customName != null);
@@ -81,7 +80,7 @@ public class PotionContentsComponentImpl implements PotionContentsComponent {
     }
 
     @Override
-    public StructuredComponentType<?> getType() {
+    public DataComponentType<?> getType() {
         return Type.INSTANCE;
     }
 
@@ -100,7 +99,7 @@ public class PotionContentsComponentImpl implements PotionContentsComponent {
         customEffects.clear();
     }
 
-    public static class Type implements StructuredComponentType<PotionContentsComponent>, Factory {
+    public static class Type implements DataComponentType<PotionContentsComponent>, Factory {
 
         public static Type INSTANCE = new Type();
 

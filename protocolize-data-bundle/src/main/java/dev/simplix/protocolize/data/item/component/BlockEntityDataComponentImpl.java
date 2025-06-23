@@ -1,7 +1,7 @@
 package dev.simplix.protocolize.data.item.component;
 
 import dev.simplix.protocolize.api.item.component.BlockEntityDataComponent;
-import dev.simplix.protocolize.api.item.component.StructuredComponentType;
+import dev.simplix.protocolize.api.item.component.DataComponentType;
 import dev.simplix.protocolize.data.util.NamedBinaryTagUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.AllArgsConstructor;
@@ -14,6 +14,7 @@ import java.io.IOException;
 @AllArgsConstructor
 public class BlockEntityDataComponentImpl implements BlockEntityDataComponent {
 
+    // TODO: convert to actual structured data
     private CompoundTag data;
 
     @Override
@@ -27,11 +28,11 @@ public class BlockEntityDataComponentImpl implements BlockEntityDataComponent {
     }
 
     @Override
-    public StructuredComponentType<?> getType() {
+    public DataComponentType<?> getType() {
         return Type.INSTANCE;
     }
 
-    public static class Type implements StructuredComponentType<BlockEntityDataComponent>, Factory {
+    public static class Type implements DataComponentType<BlockEntityDataComponent>, Factory {
 
         public static Type INSTANCE = new Type();
 

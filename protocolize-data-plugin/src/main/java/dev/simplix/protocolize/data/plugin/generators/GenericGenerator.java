@@ -51,7 +51,7 @@ public class GenericGenerator implements Generator {
         }
         keys.sort(String::compareTo);
         new ByteBuddy(ClassFileVersion.JAVA_V8).makeEnumeration(keys
-                .stream().map(s -> s.substring("minecraft:".length()).replace(".", "_").toUpperCase(Locale.ROOT)).collect(Collectors.toList()))
+                .stream().map(s -> s.substring("minecraft:".length()).replace(".", "_").replace("/", "_").toUpperCase(Locale.ROOT)).collect(Collectors.toList()))
             .name("dev.simplix.protocolize.data." + name)
             .make()
             .saveIn(target);

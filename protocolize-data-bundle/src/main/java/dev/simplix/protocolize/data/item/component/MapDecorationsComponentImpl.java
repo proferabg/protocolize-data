@@ -1,7 +1,7 @@
 package dev.simplix.protocolize.data.item.component;
 
 import dev.simplix.protocolize.api.item.component.MapDecorationsComponent;
-import dev.simplix.protocolize.api.item.component.StructuredComponentType;
+import dev.simplix.protocolize.api.item.component.DataComponentType;
 import dev.simplix.protocolize.data.util.NamedBinaryTagUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.AllArgsConstructor;
@@ -28,11 +28,11 @@ public class MapDecorationsComponentImpl implements MapDecorationsComponent {
     }
 
     @Override
-    public StructuredComponentType<?> getType() {
+    public DataComponentType<?> getType() {
         return Type.INSTANCE;
     }
 
-    public static class Type implements StructuredComponentType<MapDecorationsComponent>, Factory {
+    public static class Type implements DataComponentType<MapDecorationsComponent>, Factory {
 
         public static Type INSTANCE = new Type();
 

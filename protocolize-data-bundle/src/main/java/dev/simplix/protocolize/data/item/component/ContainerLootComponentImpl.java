@@ -1,12 +1,14 @@
 package dev.simplix.protocolize.data.item.component;
 
 import dev.simplix.protocolize.api.item.component.ContainerLootComponent;
-import dev.simplix.protocolize.api.item.component.StructuredComponentType;
+import dev.simplix.protocolize.api.item.component.DataComponentType;
 import dev.simplix.protocolize.data.util.NamedBinaryTagUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import net.querz.nbt.tag.CompoundTag;
+import net.querz.nbt.tag.LongTag;
+import net.querz.nbt.tag.StringTag;
 
 import java.io.IOException;
 
@@ -14,24 +16,38 @@ import java.io.IOException;
 @AllArgsConstructor
 public class ContainerLootComponentImpl implements ContainerLootComponent {
 
-    private CompoundTag data;
+    private String lootTable;
+    private Long seed;
 
     @Override
     public void read(ByteBuf byteBuf, int protocolVersion) throws IOException{
-        data = (CompoundTag) NamedBinaryTagUtil.readTag(byteBuf, protocolVersion);
+        CompoundTag data = (CompoundTag) NamedBinaryTagUtil.readTag(byteBuf, protocolVersion);
+        if(data != null){
+            if(data.containsKey("loot_table"))
+                lootTable = data.getStringTag("loot_table").getValue();
+            if(data.containsKey("seed"))
+                seed = data.getLongTag("seed").asLong();
+        }
     }
 
     @Override
     public void write(ByteBuf byteBuf, int protocolVersion) throws IOException {
+        CompoundTag data = new CompoundTag();
+        if(lootTable != null){
+            data.put("loot_table", new StringTag(lootTable));
+        }
+        if(seed != null){
+            data.put("seed", new LongTag(seed));
+        }
         NamedBinaryTagUtil.writeTag(byteBuf, data, protocolVersion);
     }
 
     @Override
-    public StructuredComponentType<?> getType() {
+    public DataComponentType<?> getType() {
         return Type.INSTANCE;
     }
 
-    public static class Type implements StructuredComponentType<ContainerLootComponent>, Factory {
+    public static class Type implements DataComponentType<ContainerLootComponent>, Factory {
 
         public static Type INSTANCE = new Type();
 
@@ -42,12 +58,17 @@ public class ContainerLootComponentImpl implements ContainerLootComponent {
 
         @Override
         public ContainerLootComponent createEmpty() {
-            return new ContainerLootComponentImpl(null);
+            return new ContainerLootComponentImpl(null, null);
         }
 
         @Override
-        public ContainerLootComponent create(CompoundTag compoundTag) {
-            return new ContainerLootComponentImpl(compoundTag);
+        public ContainerLootComponent create(String lootTable) {
+            return new ContainerLootComponentImpl(lootTable, null);
+        }
+
+        @Override
+        public ContainerLootComponent create(String lootTable, Long seed) {
+            return new ContainerLootComponentImpl(lootTable, seed);
         }
     }
 

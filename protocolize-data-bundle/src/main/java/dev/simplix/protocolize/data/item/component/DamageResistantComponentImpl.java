@@ -1,7 +1,7 @@
 package dev.simplix.protocolize.data.item.component;
 
 import dev.simplix.protocolize.api.item.component.DamageResistantComponent;
-import dev.simplix.protocolize.api.item.component.StructuredComponentType;
+import dev.simplix.protocolize.api.item.component.DataComponentType;
 import dev.simplix.protocolize.api.util.ProtocolUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.AllArgsConstructor;
@@ -24,11 +24,11 @@ public class DamageResistantComponentImpl implements DamageResistantComponent {
     }
 
     @Override
-    public StructuredComponentType<?> getType() {
+    public DataComponentType<?> getType() {
         return Type.INSTANCE;
     }
 
-    public static class Type implements StructuredComponentType<DamageResistantComponent>, Factory {
+    public static class Type implements DataComponentType<DamageResistantComponent>, Factory {
 
         public static Type INSTANCE = new Type();
 

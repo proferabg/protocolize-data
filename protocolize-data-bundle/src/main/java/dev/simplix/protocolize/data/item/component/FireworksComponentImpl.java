@@ -1,10 +1,10 @@
 package dev.simplix.protocolize.data.item.component;
 
-import dev.simplix.protocolize.api.item.Firework;
 import dev.simplix.protocolize.api.item.component.FireworksComponent;
-import dev.simplix.protocolize.api.item.component.StructuredComponentType;
+import dev.simplix.protocolize.api.item.component.DataComponentType;
+import dev.simplix.protocolize.api.item.objects.Firework;
 import dev.simplix.protocolize.api.util.ProtocolUtil;
-import dev.simplix.protocolize.data.util.StructuredComponentUtil;
+import dev.simplix.protocolize.data.util.DataComponentUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,7 +22,7 @@ public class FireworksComponentImpl implements FireworksComponent {
         firework.setFlightDuration(ProtocolUtil.readVarInt(byteBuf));
         int count = ProtocolUtil.readVarInt(byteBuf);
         for(int i = 0; i < count; i++) {
-            firework.getExplosions().add(StructuredComponentUtil.readFireworkMeta(byteBuf, protocolVersion));
+            firework.getExplosions().add(DataComponentUtil.readFireworkMeta(byteBuf, protocolVersion));
         }
     }
 
@@ -31,16 +31,14 @@ public class FireworksComponentImpl implements FireworksComponent {
         ProtocolUtil.writeVarInt(byteBuf, firework.getFlightDuration());
         ProtocolUtil.writeVarInt(byteBuf, firework.getExplosions().size());
         for(Firework.Meta meta : firework.getExplosions()) {
-            StructuredComponentUtil.writeFireworkMeta(byteBuf, meta, protocolVersion);
+            DataComponentUtil.writeFireworkMeta(byteBuf, protocolVersion, meta);
         }
     }
-
-    @Override
-    public StructuredComponentType<?> getType() {
+    public DataComponentType<?> getType() {
         return Type.INSTANCE;
     }
 
-    public static class Type implements StructuredComponentType<FireworksComponent>, Factory {
+    public static class Type implements DataComponentType<FireworksComponent>, Factory {
 
         public static Type INSTANCE = new Type();
 

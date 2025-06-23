@@ -63,7 +63,8 @@ public class HeldItemChange extends AbstractPacket {
         AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_20_5, MINECRAFT_1_20_6, 0x2C),
         AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_21, MINECRAFT_1_21, 0x2F),
         AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_21_2, MINECRAFT_1_21_3, 0x31),
-        AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_21_4, MINECRAFT_LATEST, 0x33)
+        AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_21_4, MINECRAFT_1_21_5, 0x33),
+        AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_21_6, MINECRAFT_LATEST, 0x34)
     );
 
     private short newSlot;

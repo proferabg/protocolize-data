@@ -4,12 +4,12 @@ import dev.simplix.protocolize.api.Protocolize;
 import dev.simplix.protocolize.api.item.BaseItemStack;
 import dev.simplix.protocolize.api.item.ItemStack;
 import dev.simplix.protocolize.api.item.ItemStackSerializer;
-import dev.simplix.protocolize.api.item.MobEffectInstance;
 import dev.simplix.protocolize.api.item.component.FoodComponent;
-import dev.simplix.protocolize.api.item.component.StructuredComponentType;
+import dev.simplix.protocolize.api.item.component.DataComponentType;
+import dev.simplix.protocolize.api.item.objects.MobEffectInstance;
 import dev.simplix.protocolize.api.providers.MappingProvider;
 import dev.simplix.protocolize.api.util.ProtocolUtil;
-import dev.simplix.protocolize.data.util.StructuredComponentUtil;
+import dev.simplix.protocolize.data.util.DataComponentUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -47,7 +47,7 @@ public class FoodComponentImpl implements FoodComponent {
         canAlwaysEat = byteBuf.readBoolean();
         if(protocolVersion < MINECRAFT_1_21_2) {
             secondsToEat = byteBuf.readFloat();
-            if (protocolVersion >= MINECRAFT_1_21) {
+            if (protocolVersion == MINECRAFT_1_21) {
                 if (byteBuf.readBoolean()) {
                     usingConvertsTo = ItemStackSerializer.read(byteBuf, protocolVersion);
                 }
@@ -55,7 +55,7 @@ public class FoodComponentImpl implements FoodComponent {
             int count = ProtocolUtil.readVarInt(byteBuf);
             effects = new HashMap<>(count);
             for (int i = 0; i < count; i++) {
-                effects.put(StructuredComponentUtil.readMobEffectInstance(byteBuf, protocolVersion), byteBuf.readFloat());
+                effects.put(DataComponentUtil.readMobEffectInstance(byteBuf, protocolVersion), byteBuf.readFloat());
             }
         }
     }
@@ -76,14 +76,14 @@ public class FoodComponentImpl implements FoodComponent {
             }
             ProtocolUtil.writeVarInt(byteBuf, effects.size());
             for (Map.Entry<MobEffectInstance, Float> entry : effects.entrySet()) {
-                StructuredComponentUtil.writeMobEffectInstance(byteBuf, entry.getKey(), protocolVersion);
+                DataComponentUtil.writeMobEffectInstance(byteBuf, protocolVersion, entry.getKey());
                 byteBuf.writeFloat(entry.getValue());
             }
         }
     }
 
     @Override
-    public StructuredComponentType<?> getType() {
+    public DataComponentType<?> getType() {
         return Type.INSTANCE;
     }
 
@@ -102,7 +102,7 @@ public class FoodComponentImpl implements FoodComponent {
         effects.clear();
     }
 
-    public static class Type implements StructuredComponentType<FoodComponent>, Factory {
+    public static class Type implements DataComponentType<FoodComponent>, Factory {
 
         public static Type INSTANCE = new Type();
 

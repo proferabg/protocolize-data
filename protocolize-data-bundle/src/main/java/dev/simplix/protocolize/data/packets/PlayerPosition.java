@@ -46,7 +46,8 @@ public class PlayerPosition extends AbstractPacket {
         AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_20_2, MINECRAFT_1_20_2, 0x16),
         AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_20_3, MINECRAFT_1_20_4, 0x17),
         AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_20_5, MINECRAFT_1_21, 0x1A),
-        AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_21_2, MINECRAFT_LATEST, 0x1C)
+        AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_21_2, MINECRAFT_1_21_5, 0x1C),
+        AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_21_6, MINECRAFT_LATEST, 0x1D)
     );
 
     private Location location;

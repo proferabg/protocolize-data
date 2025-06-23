@@ -3,7 +3,7 @@ package dev.simplix.protocolize.data.item.component;
 import dev.simplix.protocolize.api.item.BaseItemStack;
 import dev.simplix.protocolize.api.item.ItemStackSerializer;
 import dev.simplix.protocolize.api.item.component.ContainerComponent;
-import dev.simplix.protocolize.api.item.component.StructuredComponentType;
+import dev.simplix.protocolize.api.item.component.DataComponentType;
 import dev.simplix.protocolize.api.util.ProtocolUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.AllArgsConstructor;
@@ -35,7 +35,7 @@ public class ContainerComponentImpl implements ContainerComponent {
     }
 
     @Override
-    public StructuredComponentType<?> getType() {
+    public DataComponentType<?> getType() {
         return Type.INSTANCE;
     }
 
@@ -54,7 +54,7 @@ public class ContainerComponentImpl implements ContainerComponent {
         items.clear();
     }
 
-    public static class Type implements StructuredComponentType<ContainerComponent>, Factory {
+    public static class Type implements DataComponentType<ContainerComponent>, Factory {
 
         public static Type INSTANCE = new Type();
 

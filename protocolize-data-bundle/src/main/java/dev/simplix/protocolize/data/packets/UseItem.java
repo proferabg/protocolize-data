@@ -29,6 +29,8 @@ import static dev.simplix.protocolize.api.util.ProtocolVersions.*;
 @Accessors(fluent = true)
 public class UseItem extends AbstractPacket {
 
+    /* ServerboundUseItemPacket */
+
     public static final List<ProtocolIdMapping> MAPPINGS = Arrays.asList(
         AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_9, MINECRAFT_1_11_1, 0x1D),
         AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_12, MINECRAFT_1_12_2, 0x20),
@@ -42,7 +44,9 @@ public class UseItem extends AbstractPacket {
         AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_20_3, MINECRAFT_1_20_4, 0x36),
         AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_20_5, MINECRAFT_1_21_1, 0x39),
         AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_21_2, MINECRAFT_1_21_3, 0x3B),
-        AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_21_4, MINECRAFT_LATEST, 0x3D)
+        AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_21_4, MINECRAFT_1_21_4, 0x3D),
+        AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_21_5, MINECRAFT_1_21_5, 0x3F),
+        AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_21_6, MINECRAFT_LATEST, 0x40)
     );
 
     private Hand hand;

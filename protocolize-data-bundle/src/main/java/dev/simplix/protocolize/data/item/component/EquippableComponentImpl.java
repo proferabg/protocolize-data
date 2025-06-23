@@ -1,20 +1,19 @@
 package dev.simplix.protocolize.data.item.component;
 
 import dev.simplix.protocolize.api.Protocolize;
-import dev.simplix.protocolize.api.item.EquipmentSlot;
-import dev.simplix.protocolize.api.item.SoundEvent;
 import dev.simplix.protocolize.api.item.component.EquippableComponent;
-import dev.simplix.protocolize.api.item.component.StructuredComponentType;
+import dev.simplix.protocolize.api.item.component.DataComponentType;
+import dev.simplix.protocolize.api.item.enums.EquipmentSlot;
+import dev.simplix.protocolize.api.item.objects.HolderSet;
+import dev.simplix.protocolize.api.item.objects.SoundEvent;
 import dev.simplix.protocolize.api.providers.MappingProvider;
-import dev.simplix.protocolize.api.util.Either;
 import dev.simplix.protocolize.api.util.ProtocolUtil;
+import dev.simplix.protocolize.api.util.ProtocolVersions;
 import dev.simplix.protocolize.data.EntityType;
-import dev.simplix.protocolize.data.util.StructuredComponentUtil;
+import dev.simplix.protocolize.data.util.DataComponentUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-
-import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -24,17 +23,18 @@ public class EquippableComponentImpl implements EquippableComponent {
     private SoundEvent equipSound;
     private String model;
     private String cameraOverlay;
-    private Either<String, List<EntityType>> allowedEntities;
+    private HolderSet<EntityType> allowedEntities;
     private boolean dispensable;
     private boolean swappable;
     private boolean damageOnHurt;
+    private boolean equipOnInteract;
 
     private static final MappingProvider MAPPING_PROVIDER = Protocolize.mappingProvider();
 
     @Override
     public void read(ByteBuf byteBuf, int protocolVersion) throws Exception {
         slot = EquipmentSlot.values()[ProtocolUtil.readVarInt(byteBuf)];
-        equipSound = StructuredComponentUtil.readSoundEvent(byteBuf, protocolVersion);
+        equipSound = DataComponentUtil.readSoundEvent(byteBuf, protocolVersion);
         if(byteBuf.readBoolean()) {
             model = ProtocolUtil.readString(byteBuf);
         }
@@ -42,17 +42,20 @@ public class EquippableComponentImpl implements EquippableComponent {
             cameraOverlay = ProtocolUtil.readString(byteBuf);
         }
         if(byteBuf.readBoolean()) {
-            allowedEntities = StructuredComponentUtil.readHolderSet(byteBuf, EntityType.class, protocolVersion);
+            allowedEntities = DataComponentUtil.readHolderSet(byteBuf, protocolVersion, EntityType.class);
         }
         dispensable = byteBuf.readBoolean();
         swappable = byteBuf.readBoolean();
         damageOnHurt = byteBuf.readBoolean();
+        if(protocolVersion >= ProtocolVersions.MINECRAFT_1_21_5) {
+            equipOnInteract = byteBuf.readBoolean();
+        }
     }
 
     @Override
     public void write(ByteBuf byteBuf, int protocolVersion) throws Exception {
         ProtocolUtil.writeVarInt(byteBuf, slot.ordinal());
-        StructuredComponentUtil.writeSoundEvent(byteBuf, equipSound, protocolVersion);
+        DataComponentUtil.writeSoundEvent(byteBuf, protocolVersion, equipSound);
         byteBuf.writeBoolean(model != null);
         if(model != null) {
             ProtocolUtil.writeString(byteBuf, model);
@@ -63,25 +66,28 @@ public class EquippableComponentImpl implements EquippableComponent {
         }
         byteBuf.writeBoolean(allowedEntities != null);
         if(allowedEntities != null) {
-            StructuredComponentUtil.writeHolderSet(byteBuf, allowedEntities, EntityType.class, protocolVersion);
+            DataComponentUtil.writeHolderSet(byteBuf, protocolVersion, allowedEntities, EntityType.class);
         }
         byteBuf.writeBoolean(dispensable);
         byteBuf.writeBoolean(swappable);
         byteBuf.writeBoolean(damageOnHurt);
+        if(protocolVersion >= ProtocolVersions.MINECRAFT_1_21_5) {
+            byteBuf.writeBoolean(equipOnInteract);
+        }
     }
 
     @Override
-    public StructuredComponentType<?> getType() {
+    public DataComponentType<?> getType() {
         return Type.INSTANCE;
     }
 
-    public static class Type implements StructuredComponentType<EquippableComponent>, Factory {
+    public static class Type implements DataComponentType<EquippableComponent>, Factory {
 
         public static Type INSTANCE = new Type();
 
         @Override
-        public EquippableComponent create(EquipmentSlot equipmentSlot, SoundEvent equipSound, String model, String cameraOverlay, Either<String, List<EntityType>> allowedEntities, boolean dispensable, boolean swappable, boolean damageOnHurt) {
-            return new EquippableComponentImpl(equipmentSlot, equipSound, model, cameraOverlay, allowedEntities, dispensable, swappable, damageOnHurt);
+        public EquippableComponent create(EquipmentSlot equipmentSlot, SoundEvent equipSound, String model, String cameraOverlay, HolderSet<EntityType> allowedEntities, boolean dispensable, boolean swappable, boolean damageOnHurt, boolean equipOnInteract) {
+            return new EquippableComponentImpl(equipmentSlot, equipSound, model, cameraOverlay, allowedEntities, dispensable, swappable, damageOnHurt, equipOnInteract);
         }
 
         @Override
@@ -91,7 +97,7 @@ public class EquippableComponentImpl implements EquippableComponent {
 
         @Override
         public EquippableComponent createEmpty() {
-            return create(EquipmentSlot.MAINHAND, null, null, null, null, false, false, false);
+            return create(EquipmentSlot.MAINHAND, null, null, null, null, false, false, false, false);
         }
 
     }

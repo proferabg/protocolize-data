@@ -40,7 +40,9 @@ public class CloseWindow extends AbstractPacket {
         AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_19, MINECRAFT_1_19_2, 0x10),
         AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_19_3, MINECRAFT_1_19_3, 0x0F),
         AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_19_4, MINECRAFT_1_20_1, 0x11),
-        AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_20_2, MINECRAFT_LATEST, 0x12)
+        AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_20_2, MINECRAFT_1_21_4, 0x12),
+        AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_21_5, MINECRAFT_1_21_5, 0x11),
+        AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_21_6, MINECRAFT_LATEST, 0x12)
     );
 
     public static final List<ProtocolIdMapping> SERVERBOUND_MAPPINGS = Arrays.asList(

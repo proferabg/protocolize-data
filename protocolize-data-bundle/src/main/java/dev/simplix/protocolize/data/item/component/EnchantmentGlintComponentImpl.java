@@ -1,7 +1,7 @@
 package dev.simplix.protocolize.data.item.component;
 
 import dev.simplix.protocolize.api.item.component.EnchantmentGlintComponent;
-import dev.simplix.protocolize.api.item.component.StructuredComponentType;
+import dev.simplix.protocolize.api.item.component.DataComponentType;
 import io.netty.buffer.ByteBuf;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,11 +23,11 @@ public class EnchantmentGlintComponentImpl implements EnchantmentGlintComponent 
     }
 
     @Override
-    public StructuredComponentType<?> getType() {
+    public DataComponentType<?> getType() {
         return Type.INSTANCE;
     }
 
-    public static class Type implements StructuredComponentType<EnchantmentGlintComponent>, Factory {
+    public static class Type implements DataComponentType<EnchantmentGlintComponent>, Factory {
 
         public static Type INSTANCE = new Type();
 

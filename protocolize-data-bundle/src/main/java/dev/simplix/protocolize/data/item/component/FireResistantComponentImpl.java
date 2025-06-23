@@ -1,7 +1,7 @@
 package dev.simplix.protocolize.data.item.component;
 
 import dev.simplix.protocolize.api.item.component.FireResistantComponent;
-import dev.simplix.protocolize.api.item.component.StructuredComponentType;
+import dev.simplix.protocolize.api.item.component.DataComponentType;
 import io.netty.buffer.ByteBuf;
 
 public class FireResistantComponentImpl implements FireResistantComponent {
@@ -15,11 +15,11 @@ public class FireResistantComponentImpl implements FireResistantComponent {
     }
 
     @Override
-    public StructuredComponentType<?> getType() {
+    public DataComponentType<?> getType() {
         return Type.INSTANCE;
     }
 
-    public static class Type implements StructuredComponentType<FireResistantComponent>, Factory {
+    public static class Type implements DataComponentType<FireResistantComponent>, Factory {
 
         public static Type INSTANCE = new Type();
 

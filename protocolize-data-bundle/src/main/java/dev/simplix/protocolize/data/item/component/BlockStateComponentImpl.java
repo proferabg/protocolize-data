@@ -1,7 +1,7 @@
 package dev.simplix.protocolize.data.item.component;
 
 import dev.simplix.protocolize.api.item.component.BlockStateComponent;
-import dev.simplix.protocolize.api.item.component.StructuredComponentType;
+import dev.simplix.protocolize.api.item.component.DataComponentType;
 import dev.simplix.protocolize.api.util.ProtocolUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.AllArgsConstructor;
@@ -35,7 +35,7 @@ public class BlockStateComponentImpl implements BlockStateComponent {
     }
 
     @Override
-    public StructuredComponentType<?> getType() {
+    public DataComponentType<?> getType() {
         return Type.INSTANCE;
     }
 
@@ -54,7 +54,7 @@ public class BlockStateComponentImpl implements BlockStateComponent {
         properties.clear();
     }
 
-    public static class Type implements StructuredComponentType<BlockStateComponent>, Factory {
+    public static class Type implements DataComponentType<BlockStateComponent>, Factory {
 
         public static Type INSTANCE = new Type();
 

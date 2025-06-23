@@ -2,7 +2,7 @@ package dev.simplix.protocolize.data.item.component;
 
 import dev.simplix.protocolize.api.BlockPosition;
 import dev.simplix.protocolize.api.item.component.LodestoneTrackerComponent;
-import dev.simplix.protocolize.api.item.component.StructuredComponentType;
+import dev.simplix.protocolize.api.item.component.DataComponentType;
 import dev.simplix.protocolize.api.util.ProtocolUtil;
 import dev.simplix.protocolize.data.util.BlockPositionSerializer;
 import io.netty.buffer.ByteBuf;
@@ -38,11 +38,11 @@ public class LodestoneTrackerComponentImpl implements LodestoneTrackerComponent 
     }
 
     @Override
-    public StructuredComponentType<?> getType() {
+    public DataComponentType<?> getType() {
         return Type.INSTANCE;
     }
 
-    public static class Type implements StructuredComponentType<LodestoneTrackerComponent>, Factory {
+    public static class Type implements DataComponentType<LodestoneTrackerComponent>, Factory {
 
         public static Type INSTANCE = new Type();
 

@@ -1,7 +1,7 @@
 package dev.simplix.protocolize.data.item.component;
 
 import dev.simplix.protocolize.api.item.component.GliderComponent;
-import dev.simplix.protocolize.api.item.component.StructuredComponentType;
+import dev.simplix.protocolize.api.item.component.DataComponentType;
 import io.netty.buffer.ByteBuf;
 
 public class GliderComponentImpl implements GliderComponent {
@@ -15,11 +15,11 @@ public class GliderComponentImpl implements GliderComponent {
     }
 
     @Override
-    public StructuredComponentType<?> getType() {
+    public DataComponentType<?> getType() {
         return Type.INSTANCE;
     }
 
-    public static class Type implements StructuredComponentType<GliderComponent>, Factory {
+    public static class Type implements DataComponentType<GliderComponent>, Factory {
 
         public static Type INSTANCE = new Type();
 

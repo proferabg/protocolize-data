@@ -1,7 +1,7 @@
 package dev.simplix.protocolize.data.item.component;
 
 import dev.simplix.protocolize.api.item.component.NoteBlockSoundComponent;
-import dev.simplix.protocolize.api.item.component.StructuredComponentType;
+import dev.simplix.protocolize.api.item.component.DataComponentType;
 import dev.simplix.protocolize.api.util.ProtocolUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.AllArgsConstructor;
@@ -24,11 +24,11 @@ public class NoteBlockSoundComponentImpl implements NoteBlockSoundComponent {
     }
 
     @Override
-    public StructuredComponentType<?> getType() {
+    public DataComponentType<?> getType() {
         return Type.INSTANCE;
     }
 
-    public static class Type implements StructuredComponentType<NoteBlockSoundComponent>, Factory {
+    public static class Type implements DataComponentType<NoteBlockSoundComponent>, Factory {
 
         public static Type INSTANCE = new Type();
 

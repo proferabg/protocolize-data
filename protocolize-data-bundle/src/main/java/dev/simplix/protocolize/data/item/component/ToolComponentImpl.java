@@ -1,11 +1,12 @@
 package dev.simplix.protocolize.data.item.component;
 
-import dev.simplix.protocolize.api.item.ToolRule;
-import dev.simplix.protocolize.api.item.component.StructuredComponentType;
+import dev.simplix.protocolize.api.item.component.DataComponentType;
 import dev.simplix.protocolize.api.item.component.ToolComponent;
+import dev.simplix.protocolize.api.item.objects.ToolRule;
 import dev.simplix.protocolize.api.util.ProtocolUtil;
+import dev.simplix.protocolize.api.util.ProtocolVersions;
 import dev.simplix.protocolize.data.Block;
-import dev.simplix.protocolize.data.util.StructuredComponentUtil;
+import dev.simplix.protocolize.data.util.DataComponentUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,6 +21,7 @@ public class ToolComponentImpl implements ToolComponent {
     private List<ToolRule> rules;
     private float miningSpeed;
     private int damagePerBlock;
+    private boolean canDestroyBlocksInCreative;
 
     @Override
     public void read(ByteBuf byteBuf, int protocolVersion) throws Exception {
@@ -29,6 +31,9 @@ public class ToolComponentImpl implements ToolComponent {
         }
         miningSpeed = byteBuf.readFloat();
         damagePerBlock = ProtocolUtil.readVarInt(byteBuf);
+        if(protocolVersion >= ProtocolVersions.MINECRAFT_1_21_5){
+            canDestroyBlocksInCreative = byteBuf.readBoolean();
+        }
     }
 
     @Override
@@ -39,11 +44,14 @@ public class ToolComponentImpl implements ToolComponent {
         }
         byteBuf.writeFloat(miningSpeed);
         ProtocolUtil.writeVarInt(byteBuf, damagePerBlock);
+        if(protocolVersion >= ProtocolVersions.MINECRAFT_1_21_5){
+            byteBuf.writeBoolean(canDestroyBlocksInCreative);
+        }
     }
 
     private ToolRule readRule(ByteBuf byteBuf, int protocolVersion){
         ToolRule rule = new ToolRule();
-        rule.setBlockSet(StructuredComponentUtil.readHolderSet(byteBuf, Block.class, protocolVersion));
+        rule.setBlockSet(DataComponentUtil.readHolderSet(byteBuf, protocolVersion, Block.class));
         if(byteBuf.readBoolean()){
             rule.setSpeed(byteBuf.readFloat());
         }
@@ -54,7 +62,7 @@ public class ToolComponentImpl implements ToolComponent {
     }
 
     private void writeRule(ByteBuf byteBuf, ToolRule rule, int protocolVersion){
-        StructuredComponentUtil.writeHolderSet(byteBuf, rule.getBlockSet(), Block.class, protocolVersion);
+        DataComponentUtil.writeHolderSet(byteBuf, protocolVersion, rule.getBlockSet(), Block.class);
         boolean hasSpeed = rule.getSpeed() != null;
         byteBuf.writeBoolean(hasSpeed);
         if(hasSpeed){
@@ -68,7 +76,7 @@ public class ToolComponentImpl implements ToolComponent {
     }
 
     @Override
-    public StructuredComponentType<?> getType() {
+    public DataComponentType<?> getType() {
         return Type.INSTANCE;
     }
 
@@ -87,13 +95,13 @@ public class ToolComponentImpl implements ToolComponent {
         rules.clear();
     }
 
-    public static class Type implements StructuredComponentType<ToolComponent>, Factory {
+    public static class Type implements DataComponentType<ToolComponent>, Factory {
 
         public static Type INSTANCE = new Type();
 
         @Override
-        public ToolComponent create(List<ToolRule> rules, float miningSpeed, int damagePerBlock) {
-            return new ToolComponentImpl(rules, miningSpeed, damagePerBlock);
+        public ToolComponent create(List<ToolRule> rules, float miningSpeed, int damagePerBlock, boolean canDestroyBlocksInCreative) {
+            return new ToolComponentImpl(rules, miningSpeed, damagePerBlock, canDestroyBlocksInCreative);
         }
 
         @Override
@@ -103,7 +111,7 @@ public class ToolComponentImpl implements ToolComponent {
 
         @Override
         public ToolComponent createEmpty() {
-            return new ToolComponentImpl(new ArrayList<>(0), 0, 0);
+            return new ToolComponentImpl(new ArrayList<>(0), 0, 0, false);
         }
 
     }

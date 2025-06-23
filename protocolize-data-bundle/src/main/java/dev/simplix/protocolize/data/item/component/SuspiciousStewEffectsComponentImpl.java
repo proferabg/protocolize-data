@@ -1,14 +1,14 @@
 package dev.simplix.protocolize.data.item.component;
 
 import dev.simplix.protocolize.api.Protocolize;
-import dev.simplix.protocolize.api.item.component.StructuredComponentType;
+import dev.simplix.protocolize.api.item.component.DataComponentType;
 import dev.simplix.protocolize.api.item.component.SuspiciousStewEffectsComponent;
 import dev.simplix.protocolize.api.mapping.ProtocolIdMapping;
 import dev.simplix.protocolize.api.mapping.ProtocolMapping;
 import dev.simplix.protocolize.api.providers.MappingProvider;
 import dev.simplix.protocolize.api.util.ProtocolUtil;
 import dev.simplix.protocolize.data.MobEffect;
-import dev.simplix.protocolize.data.util.StructuredComponentUtil;
+import dev.simplix.protocolize.data.util.DataComponentUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -42,7 +42,7 @@ public class SuspiciousStewEffectsComponentImpl implements SuspiciousStewEffects
         for (Map.Entry<MobEffect,Integer> entry : effects.entrySet()) {
             ProtocolMapping mapping = MAPPING_PROVIDER.mapping(entry.getKey(), protocolVersion);
             if (!(mapping instanceof ProtocolIdMapping)) {
-                StructuredComponentUtil.logMappingWarning(entry.getKey().name(), protocolVersion);
+                DataComponentUtil.logMappingWarning(entry.getKey().name(), protocolVersion);
                 ProtocolUtil.writeVarInt(byteBuf, 0);
                 ProtocolUtil.writeVarInt(byteBuf, 0);
                 return;
@@ -53,7 +53,7 @@ public class SuspiciousStewEffectsComponentImpl implements SuspiciousStewEffects
     }
 
     @Override
-    public StructuredComponentType<?> getType() {
+    public DataComponentType<?> getType() {
         return Type.INSTANCE;
     }
 
@@ -72,7 +72,7 @@ public class SuspiciousStewEffectsComponentImpl implements SuspiciousStewEffects
         effects.clear();
     }
 
-    public static class Type implements StructuredComponentType<SuspiciousStewEffectsComponent>, Factory {
+    public static class Type implements DataComponentType<SuspiciousStewEffectsComponent>, Factory {
 
         public static Type INSTANCE = new Type();
 

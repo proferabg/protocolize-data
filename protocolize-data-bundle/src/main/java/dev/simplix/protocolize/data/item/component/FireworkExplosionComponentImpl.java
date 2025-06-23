@@ -1,9 +1,9 @@
 package dev.simplix.protocolize.data.item.component;
 
-import dev.simplix.protocolize.api.item.Firework;
 import dev.simplix.protocolize.api.item.component.FireworkExplosionComponent;
-import dev.simplix.protocolize.api.item.component.StructuredComponentType;
-import dev.simplix.protocolize.data.util.StructuredComponentUtil;
+import dev.simplix.protocolize.api.item.component.DataComponentType;
+import dev.simplix.protocolize.api.item.objects.Firework;
+import dev.simplix.protocolize.data.util.DataComponentUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,20 +18,20 @@ public class FireworkExplosionComponentImpl implements FireworkExplosionComponen
 
     @Override
     public void read(ByteBuf byteBuf, int protocolVersion) throws Exception {
-        explosion = StructuredComponentUtil.readFireworkMeta(byteBuf, protocolVersion);
+        explosion = DataComponentUtil.readFireworkMeta(byteBuf, protocolVersion);
     }
 
     @Override
     public void write(ByteBuf byteBuf, int protocolVersion) throws Exception {
-        StructuredComponentUtil.writeFireworkMeta(byteBuf, explosion, protocolVersion);
+        DataComponentUtil.writeFireworkMeta(byteBuf, protocolVersion, explosion);
     }
 
     @Override
-    public StructuredComponentType<?> getType() {
+    public DataComponentType<?> getType() {
         return Type.INSTANCE;
     }
 
-    public static class Type implements StructuredComponentType<FireworkExplosionComponent>, Factory {
+    public static class Type implements DataComponentType<FireworkExplosionComponent>, Factory {
 
         public static Type INSTANCE = new Type();
 

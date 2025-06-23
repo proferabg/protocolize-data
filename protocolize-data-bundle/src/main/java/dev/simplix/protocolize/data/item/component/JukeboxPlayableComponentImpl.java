@@ -1,12 +1,13 @@
 package dev.simplix.protocolize.data.item.component;
 
 import dev.simplix.protocolize.api.chat.ChatElement;
-import dev.simplix.protocolize.api.item.JukeboxSong;
 import dev.simplix.protocolize.api.item.component.JukeboxPlayableComponent;
-import dev.simplix.protocolize.api.item.component.StructuredComponentType;
+import dev.simplix.protocolize.api.item.component.DataComponentType;
+import dev.simplix.protocolize.api.item.objects.JukeboxSong;
 import dev.simplix.protocolize.api.util.ProtocolUtil;
+import dev.simplix.protocolize.api.util.ProtocolVersions;
 import dev.simplix.protocolize.data.util.NamedBinaryTagUtil;
-import dev.simplix.protocolize.data.util.StructuredComponentUtil;
+import dev.simplix.protocolize.data.util.DataComponentUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,13 +34,15 @@ public class JukeboxPlayableComponentImpl implements JukeboxPlayableComponent {
             } else {
                 songId = null;
                 jukeboxSong = new JukeboxSong();
-                jukeboxSong.setSoundEvent(StructuredComponentUtil.readSoundEvent(byteBuf, protocolVersion));
+                jukeboxSong.setSoundEvent(DataComponentUtil.readSoundEvent(byteBuf, protocolVersion));
                 jukeboxSong.setDescription(ChatElement.ofNbt(NamedBinaryTagUtil.readTag(byteBuf, protocolVersion)));
                 jukeboxSong.setDuration(byteBuf.readFloat());
                 jukeboxSong.setOutputStrength(ProtocolUtil.readVarInt(byteBuf));
             }
         }
-        showInTooltip = byteBuf.readBoolean();
+        if(protocolVersion <= ProtocolVersions.MINECRAFT_1_21_4) {
+            showInTooltip = byteBuf.readBoolean();
+        }
     }
 
     @Override
@@ -51,21 +54,23 @@ public class JukeboxPlayableComponentImpl implements JukeboxPlayableComponent {
             if(songId != null){
                 ProtocolUtil.writeVarInt(byteBuf, songId + 1);
             } else {
-                StructuredComponentUtil.writeSoundEvent(byteBuf, jukeboxSong.getSoundEvent(), protocolVersion);
+                DataComponentUtil.writeSoundEvent(byteBuf, protocolVersion, jukeboxSong.getSoundEvent());
                 NamedBinaryTagUtil.writeTag(byteBuf, jukeboxSong.getDescription().asNbt(), protocolVersion);
                 byteBuf.writeFloat(jukeboxSong.getDuration());
                 ProtocolUtil.writeVarInt(byteBuf, jukeboxSong.getOutputStrength());
             }
         }
-        byteBuf.writeBoolean(showInTooltip);
+        if(protocolVersion <= ProtocolVersions.MINECRAFT_1_21_4) {
+            byteBuf.writeBoolean(showInTooltip);
+        }
     }
 
     @Override
-    public StructuredComponentType<?> getType() {
+    public DataComponentType<?> getType() {
         return Type.INSTANCE;
     }
 
-    public static class Type implements StructuredComponentType<JukeboxPlayableComponent>, Factory {
+    public static class Type implements DataComponentType<JukeboxPlayableComponent>, Factory {
 
         public static Type INSTANCE = new Type();
 

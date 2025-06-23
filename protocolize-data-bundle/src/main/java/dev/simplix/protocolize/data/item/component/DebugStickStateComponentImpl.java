@@ -1,7 +1,7 @@
 package dev.simplix.protocolize.data.item.component;
 
 import dev.simplix.protocolize.api.item.component.DebugStickStateComponent;
-import dev.simplix.protocolize.api.item.component.StructuredComponentType;
+import dev.simplix.protocolize.api.item.component.DataComponentType;
 import dev.simplix.protocolize.data.util.NamedBinaryTagUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.AllArgsConstructor;
@@ -14,6 +14,7 @@ import java.io.IOException;
 @AllArgsConstructor
 public class DebugStickStateComponentImpl implements DebugStickStateComponent {
 
+    // TODO: convert to actual structured data
     private CompoundTag data;
 
     @Override
@@ -27,11 +28,11 @@ public class DebugStickStateComponentImpl implements DebugStickStateComponent {
     }
 
     @Override
-    public StructuredComponentType<?> getType() {
+    public DataComponentType<?> getType() {
         return Type.INSTANCE;
     }
 
-    public static class Type implements StructuredComponentType<DebugStickStateComponent>, Factory {
+    public static class Type implements DataComponentType<DebugStickStateComponent>, Factory {
 
         public static Type INSTANCE = new Type();
 

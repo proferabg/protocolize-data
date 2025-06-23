@@ -4,13 +4,13 @@ import dev.simplix.protocolize.api.ClickType;
 import dev.simplix.protocolize.api.PacketDirection;
 import dev.simplix.protocolize.api.item.ItemStack;
 import dev.simplix.protocolize.api.item.ItemStackSerializer;
-import dev.simplix.protocolize.api.item.component.exception.InvalidDataComponentTypeException;
-import dev.simplix.protocolize.api.item.component.exception.InvalidDataComponentVersionException;
 import dev.simplix.protocolize.api.mapping.AbstractProtocolMapping;
 import dev.simplix.protocolize.api.mapping.ProtocolIdMapping;
 import dev.simplix.protocolize.api.packet.AbstractPacket;
 import dev.simplix.protocolize.api.util.DebugUtil;
 import dev.simplix.protocolize.api.util.ProtocolUtil;
+import dev.simplix.protocolize.api.util.exception.ExceptionUtil;
+import dev.simplix.protocolize.api.util.exception.ProtocolizeException;
 import io.netty.buffer.ByteBuf;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -54,7 +54,8 @@ public class ClickWindow extends AbstractPacket {
         AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_19_4, MINECRAFT_1_20_1, 0x0B),
         AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_20_2, MINECRAFT_1_20_4, 0x0D),
         AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_20_5, MINECRAFT_1_21, 0x0E),
-        AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_21_2, MINECRAFT_LATEST, 0x10)
+        AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_21_2, MINECRAFT_1_21_5, 0x10),
+        AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_21_6, MINECRAFT_LATEST, 0x11)
     );
 
     private Map<Short, ItemStack> slotData = new HashMap<>();
@@ -110,8 +111,7 @@ public class ClickWindow extends AbstractPacket {
             this.itemStack = ItemStackSerializer.read(buf, protocolVersion);
         } catch (Exception e) {
             if(DebugUtil.enabled) log.info(sb.toString());
-            if((e instanceof InvalidDataComponentVersionException || e instanceof InvalidDataComponentTypeException) ||
-                (e.getCause() != null && (e.getCause() instanceof InvalidDataComponentVersionException || e.getCause() instanceof InvalidDataComponentTypeException))){
+            if(ExceptionUtil.getRootCause(e) instanceof ProtocolizeException){
                 log.error("Skipping decoding ClickWindow packet: {}", e.getMessage());
             } else {
                 log.error("Skipping decoding ClickWindow packet", e);

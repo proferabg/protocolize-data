@@ -1,8 +1,8 @@
 package dev.simplix.protocolize.data.item.component;
 
-import dev.simplix.protocolize.api.item.Bee;
 import dev.simplix.protocolize.api.item.component.BeesComponent;
-import dev.simplix.protocolize.api.item.component.StructuredComponentType;
+import dev.simplix.protocolize.api.item.component.DataComponentType;
+import dev.simplix.protocolize.api.item.objects.Bee;
 import dev.simplix.protocolize.api.util.ProtocolUtil;
 import dev.simplix.protocolize.data.util.NamedBinaryTagUtil;
 import io.netty.buffer.ByteBuf;
@@ -19,6 +19,8 @@ import java.util.List;
 public class BeesComponentImpl implements BeesComponent {
 
     private List<Bee> bees;
+
+    // TODO: CHECK
 
     @Override
     public void read(ByteBuf byteBuf, int protocolVersion) throws Exception {
@@ -42,7 +44,7 @@ public class BeesComponentImpl implements BeesComponent {
     }
 
     @Override
-    public StructuredComponentType<?> getType() {
+    public DataComponentType<?> getType() {
         return Type.INSTANCE;
     }
 
@@ -61,7 +63,7 @@ public class BeesComponentImpl implements BeesComponent {
         bees.clear();
     }
 
-    public static class Type implements StructuredComponentType<BeesComponent>, Factory {
+    public static class Type implements DataComponentType<BeesComponent>, Factory {
 
         public static Type INSTANCE = new Type();
 

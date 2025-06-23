@@ -2,13 +2,13 @@ package dev.simplix.protocolize.data.item.component;
 
 import dev.simplix.protocolize.api.Protocolize;
 import dev.simplix.protocolize.api.item.component.PotDecorationsComponent;
-import dev.simplix.protocolize.api.item.component.StructuredComponentType;
+import dev.simplix.protocolize.api.item.component.DataComponentType;
 import dev.simplix.protocolize.api.mapping.ProtocolIdMapping;
 import dev.simplix.protocolize.api.mapping.ProtocolMapping;
 import dev.simplix.protocolize.api.providers.MappingProvider;
 import dev.simplix.protocolize.api.util.ProtocolUtil;
 import dev.simplix.protocolize.data.ItemType;
-import dev.simplix.protocolize.data.util.StructuredComponentUtil;
+import dev.simplix.protocolize.data.util.DataComponentUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -42,7 +42,7 @@ public class PotDecorationsComponentImpl implements PotDecorationsComponent {
         for(ItemType decoration : decorations) {
             ProtocolMapping mapping = MAPPING_PROVIDER.mapping(decoration, protocolVersion);
             if (!(mapping instanceof ProtocolIdMapping)) {
-                StructuredComponentUtil.logMappingWarning(decoration.name(), protocolVersion);
+                DataComponentUtil.logMappingWarning(decoration.name(), protocolVersion);
                 ProtocolUtil.writeVarInt(byteBuf, 0);
             } else {
                 ProtocolUtil.writeVarInt(byteBuf, ((ProtocolIdMapping) mapping).id());
@@ -51,11 +51,11 @@ public class PotDecorationsComponentImpl implements PotDecorationsComponent {
     }
 
     @Override
-    public StructuredComponentType<?> getType() {
+    public DataComponentType<?> getType() {
         return Type.INSTANCE;
     }
 
-    public static class Type implements StructuredComponentType<PotDecorationsComponent>, Factory {
+    public static class Type implements DataComponentType<PotDecorationsComponent>, Factory {
 
         public static Type INSTANCE = new Type();
 

@@ -2,16 +2,16 @@ package dev.simplix.protocolize.data.item.component;
 
 import dev.simplix.protocolize.api.Protocolize;
 import dev.simplix.protocolize.api.chat.ChatElement;
-import dev.simplix.protocolize.api.item.SoundEvent;
 import dev.simplix.protocolize.api.item.component.InstrumentComponent;
-import dev.simplix.protocolize.api.item.component.StructuredComponentType;
+import dev.simplix.protocolize.api.item.component.DataComponentType;
+import dev.simplix.protocolize.api.item.objects.SoundEvent;
 import dev.simplix.protocolize.api.mapping.ProtocolIdMapping;
 import dev.simplix.protocolize.api.mapping.ProtocolMapping;
 import dev.simplix.protocolize.api.providers.MappingProvider;
 import dev.simplix.protocolize.api.util.ProtocolUtil;
 import dev.simplix.protocolize.data.Instrument;
 import dev.simplix.protocolize.data.util.NamedBinaryTagUtil;
-import dev.simplix.protocolize.data.util.StructuredComponentUtil;
+import dev.simplix.protocolize.data.util.DataComponentUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,6 +29,8 @@ public class InstrumentComponentImpl implements InstrumentComponent {
     private float duration, range;
     private ChatElement<?> description;
 
+    //TODO: CHECK
+
     private static final MappingProvider MAPPING_PROVIDER = Protocolize.mappingProvider();
 
     @Override
@@ -37,7 +39,7 @@ public class InstrumentComponentImpl implements InstrumentComponent {
         if(type != 0){
             instrument = MAPPING_PROVIDER.mapIdToEnum(type - 1, protocolVersion, Instrument.class);
         } else {
-            soundEvent = StructuredComponentUtil.readSoundEvent(byteBuf, protocolVersion);
+            soundEvent = DataComponentUtil.readSoundEvent(byteBuf, protocolVersion);
             duration = byteBuf.readFloat();
             range = byteBuf.readFloat();
             if(protocolVersion >= MINECRAFT_1_21_2){
@@ -51,13 +53,13 @@ public class InstrumentComponentImpl implements InstrumentComponent {
         if(instrument != null){
             ProtocolMapping mapping = MAPPING_PROVIDER.mapping(instrument, protocolVersion);
             if (!(mapping instanceof ProtocolIdMapping)) {
-                StructuredComponentUtil.logMappingWarning(instrument.name(), protocolVersion);
+                DataComponentUtil.logMappingWarning(instrument.name(), protocolVersion);
                 ProtocolUtil.writeVarInt(byteBuf, 1);
             } else {
                 ProtocolUtil.writeVarInt(byteBuf, ((ProtocolIdMapping) mapping).id() + 1);
             }
         } else {
-            StructuredComponentUtil.writeSoundEvent(byteBuf, soundEvent, protocolVersion);
+            DataComponentUtil.writeSoundEvent(byteBuf, protocolVersion, soundEvent);
             byteBuf.writeFloat(duration);
             byteBuf.writeFloat(range);
             if(protocolVersion >= MINECRAFT_1_21_2){
@@ -67,11 +69,11 @@ public class InstrumentComponentImpl implements InstrumentComponent {
     }
 
     @Override
-    public StructuredComponentType<?> getType() {
+    public DataComponentType<?> getType() {
         return Type.INSTANCE;
     }
 
-    public static class Type implements StructuredComponentType<InstrumentComponent>, Factory {
+    public static class Type implements DataComponentType<InstrumentComponent>, Factory {
 
         public static Type INSTANCE = new Type();
 

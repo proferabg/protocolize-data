@@ -39,6 +39,8 @@ public class SoundEffect extends AbstractPacket {
 
     private static final MappingProvider MAPPING_PROVIDER = Protocolize.mappingProvider();
 
+    /* ClientboundSoundPacket */
+
     public static final List<ProtocolIdMapping> MAPPINGS = Arrays.asList(
         AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_9, MINECRAFT_1_9_2, 0x47),
         AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_9_3, MINECRAFT_1_11_2, 0x46),
@@ -56,7 +58,8 @@ public class SoundEffect extends AbstractPacket {
         AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_20_2, MINECRAFT_1_20_2, 0x64),
         AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_20_3, MINECRAFT_1_20_4, 0x66),
         AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_20_5, MINECRAFT_1_21, 0x68),
-        AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_21_2, MINECRAFT_LATEST, 0x6F)
+        AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_21_2, MINECRAFT_1_21_4, 0x6F),
+        AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_21_5, MINECRAFT_LATEST, 0x6E)
     );
 
     @Setter(AccessLevel.NONE)

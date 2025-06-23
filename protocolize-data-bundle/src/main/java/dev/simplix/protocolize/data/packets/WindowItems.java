@@ -4,13 +4,13 @@ import dev.simplix.protocolize.api.PacketDirection;
 import dev.simplix.protocolize.api.item.BaseItemStack;
 import dev.simplix.protocolize.api.item.ItemStack;
 import dev.simplix.protocolize.api.item.ItemStackSerializer;
-import dev.simplix.protocolize.api.item.component.exception.InvalidDataComponentTypeException;
-import dev.simplix.protocolize.api.item.component.exception.InvalidDataComponentVersionException;
 import dev.simplix.protocolize.api.mapping.AbstractProtocolMapping;
 import dev.simplix.protocolize.api.mapping.ProtocolIdMapping;
 import dev.simplix.protocolize.api.packet.AbstractPacket;
 import dev.simplix.protocolize.api.util.DebugUtil;
 import dev.simplix.protocolize.api.util.ProtocolUtil;
+import dev.simplix.protocolize.api.util.exception.ExceptionUtil;
+import dev.simplix.protocolize.api.util.exception.ProtocolizeException;
 import dev.simplix.protocolize.data.util.LazyBuffer;
 import io.netty.buffer.ByteBuf;
 import lombok.*;
@@ -51,7 +51,8 @@ public class WindowItems extends AbstractPacket {
         AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_19, MINECRAFT_1_19_2, 0x11),
         AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_19_3, MINECRAFT_1_19_3, 0x10),
         AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_19_4, MINECRAFT_1_20_1, 0x12),
-        AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_20_2, MINECRAFT_LATEST, 0x13)
+        AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_20_2, MINECRAFT_1_21_4, 0x13),
+        AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_21_5, MINECRAFT_LATEST, 0x12)
     );
 
     @Getter(AccessLevel.NONE)
@@ -112,8 +113,7 @@ public class WindowItems extends AbstractPacket {
             });
         } catch (Exception e) {
             if(DebugUtil.enabled) log.info(sb.toString());
-            if((e instanceof InvalidDataComponentVersionException || e instanceof InvalidDataComponentTypeException) ||
-                (e.getCause() != null && (e.getCause() instanceof InvalidDataComponentVersionException || e.getCause() instanceof InvalidDataComponentTypeException))){
+            if(ExceptionUtil.getRootCause(e) instanceof ProtocolizeException){
                 log.error("Skipping decoding WindowItems packet: {}", e.getMessage());
             } else {
                 log.error("Skipping decoding WindowItems packet", e);

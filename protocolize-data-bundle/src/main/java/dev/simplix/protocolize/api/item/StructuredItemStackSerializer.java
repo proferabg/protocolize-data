@@ -4,13 +4,13 @@ import com.google.common.collect.Multimap;
 import dev.simplix.protocolize.api.Protocolize;
 import dev.simplix.protocolize.api.chat.ChatElement;
 import dev.simplix.protocolize.api.item.component.*;
-import dev.simplix.protocolize.api.item.component.exception.InvalidDataComponentTypeException;
-import dev.simplix.protocolize.api.item.component.exception.InvalidDataComponentVersionException;
 import dev.simplix.protocolize.api.mapping.ProtocolIdMapping;
 import dev.simplix.protocolize.api.mapping.ProtocolMapping;
 import dev.simplix.protocolize.api.providers.MappingProvider;
 import dev.simplix.protocolize.api.util.DebugUtil;
 import dev.simplix.protocolize.api.util.ProtocolUtil;
+import dev.simplix.protocolize.api.util.exception.InvalidDataComponentTypeException;
+import dev.simplix.protocolize.api.util.exception.InvalidDataComponentVersionException;
 import dev.simplix.protocolize.data.ItemType;
 import io.netty.buffer.ByteBuf;
 import lombok.extern.slf4j.Slf4j;
@@ -46,8 +46,8 @@ public final class StructuredItemStackSerializer {
             sb.append("\n    Components(+): 0x").append(Integer.toHexString(toAdd));
             int toRemove = ProtocolUtil.readVarInt(buf);
             sb.append("\n    Components(-): 0x").append(Integer.toHexString(toRemove));
-            List<StructuredComponent> componentsToAdd = new ArrayList<>(toAdd);
-            List<StructuredComponentType<?>> componentsToRemove = new ArrayList<>(toRemove);
+            List<DataComponent> componentsToAdd = new ArrayList<>(toAdd);
+            List<DataComponentType<?>> componentsToRemove = new ArrayList<>(toRemove);
             for (int i = 0; i < toAdd; i++) {
                 componentsToAdd.add(readComponent(buf, protocolVersion, sb));
             }
@@ -84,10 +84,10 @@ public final class StructuredItemStackSerializer {
         ProtocolUtil.writeVarInt(buf, ((ProtocolIdMapping) mapping).id());
         ProtocolUtil.writeVarInt(buf, stack.getComponents().size());
         ProtocolUtil.writeVarInt(buf, stack.getComponentsToRemove().size());
-        for (StructuredComponent component : stack.getComponents()) {
+        for (DataComponent component : stack.getComponents()) {
             writeComponent(buf, component, protocolVersion);
         }
-        for (StructuredComponentType<?> type : stack.getComponentsToRemove()) {
+        for (DataComponentType<?> type : stack.getComponentsToRemove()) {
             writeComponentType(buf, type, protocolVersion);
         }
     }
@@ -103,7 +103,7 @@ public final class StructuredItemStackSerializer {
         }
     }
 
-    private void writeComponent(ByteBuf buf, StructuredComponent component, int protocolVersion) {
+    private void writeComponent(ByteBuf buf, DataComponent component, int protocolVersion) {
         writeComponentType(buf, component.getType(), protocolVersion);
         try {
             component.write(buf, protocolVersion);
@@ -112,7 +112,7 @@ public final class StructuredItemStackSerializer {
         }
     }
 
-    private void writeComponentType(ByteBuf buf, StructuredComponentType<?> componentType, int protocolVersion) {
+    private void writeComponentType(ByteBuf buf, DataComponentType<?> componentType, int protocolVersion) {
         ProtocolMapping mapping = MAPPING_PROVIDER.mapping(componentType, protocolVersion);
         if (!(mapping instanceof ProtocolIdMapping)) {
             throw new InvalidDataComponentVersionException(componentType, protocolVersion);
@@ -135,10 +135,10 @@ public final class StructuredItemStackSerializer {
         }
     }
 
-    private StructuredComponent readComponent(ByteBuf buf, int protocolVersion, StringBuilder sb) {
-        StructuredComponentType<?> type = readComponentType(buf, protocolVersion, sb);
+    private DataComponent readComponent(ByteBuf buf, int protocolVersion, StringBuilder sb) {
+        DataComponentType<?> type = readComponentType(buf, protocolVersion, sb);
         sb.append("\n    Component Type: ").append(type.getName());
-        StructuredComponent component = type.createEmpty();
+        DataComponent component = type.createEmpty();
         try {
             component.read(buf, protocolVersion);
         } catch (Exception e) {
@@ -147,15 +147,15 @@ public final class StructuredItemStackSerializer {
         return component;
     }
 
-    private StructuredComponentType<?> readComponentType(ByteBuf buf, int protocolVersion, StringBuilder sb) {
+    private DataComponentType<?> readComponentType(ByteBuf buf, int protocolVersion, StringBuilder sb) {
         int componentId = ProtocolUtil.readVarInt(buf);
         sb.append("\n    Component ID: 0x").append(Integer.toHexString(componentId));
         return findComponentType(componentId, protocolVersion);
     }
 
-    private StructuredComponentType<?> findComponentType(int componentId, int protocolVersion) {
-        Multimap<StructuredComponentType, ProtocolMapping> mappings = MAPPING_PROVIDER.mappings(StructuredComponentType.class, protocolVersion);
-        for (StructuredComponentType<?> type : mappings.keySet()) {
+    private DataComponentType<?> findComponentType(int componentId, int protocolVersion) {
+        Multimap<DataComponentType, ProtocolMapping> mappings = MAPPING_PROVIDER.mappings(DataComponentType.class, protocolVersion);
+        for (DataComponentType<?> type : mappings.keySet()) {
             for (ProtocolMapping mapping : mappings.get(type)) {
                 if (mapping instanceof ProtocolIdMapping && ((ProtocolIdMapping) mapping).id() == componentId) {
                     return type;
