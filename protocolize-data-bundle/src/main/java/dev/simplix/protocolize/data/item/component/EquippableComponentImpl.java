@@ -28,6 +28,8 @@ public class EquippableComponentImpl implements EquippableComponent {
     private boolean swappable;
     private boolean damageOnHurt;
     private boolean equipOnInteract;
+    private boolean canBeSheared;
+    private SoundEvent shearingSound;
 
     private static final MappingProvider MAPPING_PROVIDER = Protocolize.mappingProvider();
 
@@ -49,6 +51,10 @@ public class EquippableComponentImpl implements EquippableComponent {
         damageOnHurt = byteBuf.readBoolean();
         if(protocolVersion >= ProtocolVersions.MINECRAFT_1_21_5) {
             equipOnInteract = byteBuf.readBoolean();
+        }
+        if(protocolVersion >= ProtocolVersions.MINECRAFT_1_21_6) {
+            canBeSheared = byteBuf.readBoolean();
+            shearingSound = DataComponentUtil.readSoundEvent(byteBuf, protocolVersion);
         }
     }
 
@@ -74,6 +80,10 @@ public class EquippableComponentImpl implements EquippableComponent {
         if(protocolVersion >= ProtocolVersions.MINECRAFT_1_21_5) {
             byteBuf.writeBoolean(equipOnInteract);
         }
+        if(protocolVersion >= ProtocolVersions.MINECRAFT_1_21_6) {
+            byteBuf.writeBoolean(canBeSheared);
+            DataComponentUtil.writeSoundEvent(byteBuf, protocolVersion, shearingSound);
+        }
     }
 
     @Override
@@ -86,8 +96,8 @@ public class EquippableComponentImpl implements EquippableComponent {
         public static Type INSTANCE = new Type();
 
         @Override
-        public EquippableComponent create(EquipmentSlot equipmentSlot, SoundEvent equipSound, String model, String cameraOverlay, HolderSet<EntityType> allowedEntities, boolean dispensable, boolean swappable, boolean damageOnHurt, boolean equipOnInteract) {
-            return new EquippableComponentImpl(equipmentSlot, equipSound, model, cameraOverlay, allowedEntities, dispensable, swappable, damageOnHurt, equipOnInteract);
+        public EquippableComponent create(EquipmentSlot equipmentSlot, SoundEvent equipSound, String model, String cameraOverlay, HolderSet<EntityType> allowedEntities, boolean dispensable, boolean swappable, boolean damageOnHurt, boolean equipOnInteract, boolean canBeSheared, SoundEvent shearingSound) {
+            return new EquippableComponentImpl(equipmentSlot, equipSound, model, cameraOverlay, allowedEntities, dispensable, swappable, damageOnHurt, equipOnInteract, canBeSheared, shearingSound);
         }
 
         @Override
@@ -97,7 +107,7 @@ public class EquippableComponentImpl implements EquippableComponent {
 
         @Override
         public EquippableComponent createEmpty() {
-            return create(EquipmentSlot.MAINHAND, null, null, null, null, false, false, false, false);
+            return create(EquipmentSlot.MAINHAND, null, null, null, null, false, false, false, false, false, null);
         }
 
     }

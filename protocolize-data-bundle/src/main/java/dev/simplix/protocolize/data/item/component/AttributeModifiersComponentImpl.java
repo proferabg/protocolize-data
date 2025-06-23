@@ -1,6 +1,7 @@
 package dev.simplix.protocolize.data.item.component;
 
 import dev.simplix.protocolize.api.Protocolize;
+import dev.simplix.protocolize.api.chat.ChatElement;
 import dev.simplix.protocolize.api.item.component.AttributeModifiersComponent;
 import dev.simplix.protocolize.api.item.component.DataComponentType;
 import dev.simplix.protocolize.api.item.enums.EquipmentSlotGroup;
@@ -15,6 +16,7 @@ import dev.simplix.protocolize.api.util.ProtocolUtil;
 import dev.simplix.protocolize.api.util.ProtocolVersions;
 import dev.simplix.protocolize.data.Attribute;
 import dev.simplix.protocolize.data.util.DataComponentUtil;
+import dev.simplix.protocolize.data.util.NamedBinaryTagUtil;
 import io.netty.buffer.ByteBuf;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -52,6 +54,22 @@ public class AttributeModifiersComponentImpl implements AttributeModifiersCompon
             attributeModifier.setModifier(modifier);
             attributeModifier.setSlot(EquipmentSlotGroup.values()[ProtocolUtil.readVarInt(byteBuf)]);
             attributeModifiers.add(attributeModifier);
+            if(protocolVersion >= ProtocolVersions.MINECRAFT_1_21_6) {
+                int displayType =  ProtocolUtil.readVarInt(byteBuf);
+                switch (displayType) {
+                    case 1:
+                        attributeModifier.setDisplay(new ItemAttributeModifier.Display.Hidden());
+                        break;
+                    case 2:
+                        attributeModifier.setDisplay(new ItemAttributeModifier.Display.Override(ChatElement.ofNbt(NamedBinaryTagUtil.readTag(byteBuf, protocolVersion))));
+                        break;
+                    case 0:
+                    default:
+                        attributeModifier.setDisplay(new ItemAttributeModifier.Display.Default());
+                        break;
+
+                }
+            }
         }
         if(protocolVersion <= ProtocolVersions.MINECRAFT_1_21_4) {
             showInTooltip = byteBuf.readBoolean();
@@ -76,6 +94,12 @@ public class AttributeModifiersComponentImpl implements AttributeModifiersCompon
             byteBuf.writeDouble(attributeModifier.getModifier().getAmount().getExact());
             ProtocolUtil.writeVarInt(byteBuf, attributeModifier.getModifier().getOperation().ordinal());
             ProtocolUtil.writeVarInt(byteBuf, attributeModifier.getSlot().ordinal());
+            if(protocolVersion >= ProtocolVersions.MINECRAFT_1_21_6) {
+                ProtocolUtil.writeVarInt(byteBuf, attributeModifier.getDisplay().getId());
+                if(attributeModifier.getDisplay() instanceof ItemAttributeModifier.Display.Override){
+                    NamedBinaryTagUtil.writeTag(byteBuf, ((ItemAttributeModifier.Display.Override) attributeModifier.getDisplay()).getText().asNbt(), protocolVersion);
+                }
+            }
         }
         if(protocolVersion <= ProtocolVersions.MINECRAFT_1_21_4) {
             byteBuf.writeBoolean(showInTooltip);
