@@ -40,12 +40,6 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>net.obvj</groupId>
-            <artifactId>jsonmerge-core</artifactId>
-            <version>1.2.3</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
             <groupId>dev.simplix</groupId>
             <artifactId>protocolize-data-registries</artifactId>
             <version>${parent.version}</version>

@@ -1,4 +1,40 @@
 {
+  "minecraft:sound_event": {
+    "entries": {
+      "minecraft:entity.puffer_fish.ambient": {
+        "protocol_id": -1,
+        "removed_at": "1.21.6"
+      },
+      "minecraft:entity.leash_knot.break": {
+        "protocol_id": -1,
+        "removed_at": "1.21.6"
+      },
+      "minecraft:entity.leash_knot.place": {
+        "protocol_id": -1,
+        "removed_at": "1.21.6"
+      },
+      "minecraft:block.sand.wind": {
+        "protocol_id": -1,
+        "removed_at": "1.21.6"
+      },
+      "minecraft:entity.wolf.howl": {
+        "protocol_id": -1,
+        "removed_at": "1.21.6"
+      }
+    }
+  },
+  "minecraft:entity_type": {
+    "entries": {
+      "minecraft:potion": {
+        "protocol_id": -1,
+        "removed_at": "1.21.5"
+      },
+      "minecraft:creaking_transient": {
+        "protocol_id": -1,
+        "removed_at": "1.21.4"
+      }
+    }
+  },
   "minecraft:armor_material": {
     "entries": {
       "minecraft:leather": {

@@ -2,6 +2,9 @@ package dev.simplix.protocolize.data;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import dev.simplix.protocolize.api.Direction;
 import dev.simplix.protocolize.api.PacketDirection;
@@ -21,11 +24,14 @@ import dev.simplix.protocolize.data.registries.Registries;
 import dev.simplix.protocolize.data.registries.RegistryEntry;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Date: 23.08.2021
@@ -45,12 +51,13 @@ public class DataModule implements ProtocolizeModule {
     }
 
     private void registerMappingsForProtocol(MappingProvider provider, int protocolVersion) {
-        try (InputStream stream = DataModule.class.getResourceAsStream("/registries/" + protocolVersion + "/registries.json")) {
-            if (stream == null) {
+        try {
+            Registries registries = getRegistry(protocolVersion);
+            if(registries == null){
                 registerItemsUsingLegacyFormat(provider, protocolVersion);
                 return;
             }
-            Registries registries = this.gson.fromJson(new InputStreamReader(stream, StandardCharsets.UTF_8), Registries.class);
+
             registerIdMappings(registries.itemRegistry().entries(), provider, protocolVersion, ItemType.class);
             if(protocolVersion >= ProtocolVersions.MINECRAFT_1_20_5) {
                 registerIdMappings(registries.attributeRegistry().entries(), provider, protocolVersion, Attribute.class);
@@ -99,6 +106,42 @@ public class DataModule implements ProtocolizeModule {
         }
     }
 
+    private Registries getRegistry(int protocolVersion) {
+        try {
+            Registries registry;
+            String minecraftRegistryStr = getResourceFileAsString("/registries/" + protocolVersion + "/registries.json");
+            if(minecraftRegistryStr != null && !minecraftRegistryStr.isEmpty()) {
+                JsonObject minecraftRegistry = JsonParser.parseString(minecraftRegistryStr).getAsJsonObject();
+
+                // some items like enchantments, instruments, and damage types are not in the generated registries.json
+                // so we can use an extended.json file for any internal or custom registries and merge them with the unmodified registries.json
+                String extendedRegistryStr = getResourceFileAsString("/registries/" + protocolVersion + "/extended.json");
+                if(extendedRegistryStr != null){
+                    // extended registry first so that it take president in case of wanting to overwrite/patch registries
+                    JsonObject extendedRegistry = JsonParser.parseString(extendedRegistryStr).getAsJsonObject();
+                    minecraftRegistry = jsonMerge(minecraftRegistry, extendedRegistry);
+                }
+
+                registry = this.gson.fromJson(minecraftRegistry, Registries.class);
+                return registry;
+            }
+            return null;
+        } catch (Exception e){
+            log.error("Failed to get registry for version {}", protocolVersion, e);
+            return null;
+        }
+    }
+
+    private static String getResourceFileAsString(String fileName) throws IOException {
+        try (InputStream is = DataModule.class.getResourceAsStream(fileName)) {
+            if (is == null) return null;
+            try (InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
+                 BufferedReader reader = new BufferedReader(isr)) {
+                return reader.lines().collect(Collectors.joining(System.lineSeparator()));
+            }
+        }
+    }
+
     private void registerItemsUsingLegacyFormat(MappingProvider provider, int protocolVersion) {
         try (InputStream stream = DataModule.class.getResourceAsStream("/registries/" + protocolVersion + "/items.json")) {
             if (stream == null) {
@@ -114,7 +157,7 @@ public class DataModule implements ProtocolizeModule {
 
     private <T extends Enum<T>> void registerIdMappings(Map<String, RegistryEntry> entries, MappingProvider provider, int protocolVersion, Class<T> enumClass) {
         for (String type : entries.keySet()) {
-            String name = type.substring("minecraft:".length()).replace(".", "_").toUpperCase(Locale.ROOT);
+            String name = type.substring("minecraft:".length()).replace(".", "_").replace("/", "_").toUpperCase(Locale.ROOT);
             try {
                 T value = Enum.valueOf(enumClass, name);
                 int id = entries.get(type).protocolId();
@@ -127,7 +170,7 @@ public class DataModule implements ProtocolizeModule {
 
     private <T extends Enum<T>> void registerStringMappings(Map<String, RegistryEntry> entries, MappingProvider provider, int protocolVersion, Class<T> enumClass) {
         for (String type : entries.keySet()) {
-            String name = type.substring("minecraft:".length()).replace(".", "_").toUpperCase(Locale.ROOT);
+            String name = type.substring("minecraft:".length()).replace(".", "_").replace("/", "_").toUpperCase(Locale.ROOT);
             try {
                 T value = Enum.valueOf(enumClass, name);
                 int protocolId = entries.get(type).protocolId();
@@ -136,6 +179,29 @@ public class DataModule implements ProtocolizeModule {
                 log.warn("Don't know what {}: {} was at protocol {}", enumClass.getSimpleName(), name, protocolVersion);
             }
         }
+    }
+
+    private static JsonObject jsonMerge(JsonObject jsonA, JsonObject jsonB) {
+        for (Map.Entry<String, JsonElement> sourceEntry : jsonA.entrySet()) {
+            String key = sourceEntry.getKey();
+            JsonElement value = sourceEntry.getValue();
+            if (!jsonB.has(key)) {
+                if (!value.isJsonNull()) {
+                    jsonB.add(key, value);
+                }
+            } else {
+                if (!value.isJsonNull()) {
+                    if (value.isJsonObject()) {
+                        jsonMerge(value.getAsJsonObject(), jsonB.get(key).getAsJsonObject());
+                    } else {
+                        jsonB.add(key, value);
+                    }
+                } else {
+                    jsonB.remove(key);
+                }
+            }
+        }
+        return jsonB;
     }
 
     @Override

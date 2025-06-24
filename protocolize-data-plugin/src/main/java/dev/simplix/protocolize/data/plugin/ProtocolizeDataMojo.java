@@ -1,13 +1,14 @@
 package dev.simplix.protocolize.data.plugin;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import dev.simplix.protocolize.data.plugin.generator.Generator;
 import dev.simplix.protocolize.data.plugin.generators.GenericGenerator;
 import dev.simplix.protocolize.data.registries.GenericRegistry;
 import dev.simplix.protocolize.data.registries.Registries;
 import lombok.SneakyThrows;
-import net.minidev.json.JSONObject;
-import net.obvj.jsonmerge.JsonMerger;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugins.annotations.Mojo;
 
@@ -75,7 +76,7 @@ public class ProtocolizeDataMojo extends AbstractMojo {
             new GenericGenerator(CLASSES_DIR, latestRegistries.paintingVariantRegistry(), "PaintingVariant"),
             new GenericGenerator(CLASSES_DIR, latestRegistries.llamaVariantRegistry(), "LlamaVariant"),
             new GenericGenerator(CLASSES_DIR, latestRegistries.axolotlVariantRegistry(), "AxolotlVariant"),
-            new GenericGenerator(CLASSES_DIR, latestRegistries.axolotlVariantRegistry(), "CatVariant")
+            new GenericGenerator(CLASSES_DIR, latestRegistries.catVariantRegistry(), "CatVariant")
         ));
 
 
@@ -108,28 +109,26 @@ public class ProtocolizeDataMojo extends AbstractMojo {
         }
     }
 
-    private Registries getRegistry(int protocolVersion) throws FileNotFoundException {
+    private Registries getRegistry(int protocolVersion) {
         if(parsedRegistries.containsKey(protocolVersion)){
             return parsedRegistries.get(protocolVersion);
         } else {
             try {
                 Registries registry;
-                String minecraftRegistryStr = readFile(new File("protocolize-data-bundle/src/main/resources/registries/" + protocolVersion + "/registries.json").getAbsolutePath());
-
+                JsonObject minecraftRegistry = JsonParser.parseString(readFile(new File("protocolize-data-bundle/src/main/resources/registries/" + protocolVersion + "/registries.json").getAbsolutePath())).getAsJsonObject();
                 // some items like enchantments, instruments, and damage types are not in the generated registries.json
                 // so we can use an extended.json file for any internal or custom registries and merge them with the unmodified registries.json
-                File extendedRegistry = new File("protocolize-data-bundle/src/main/resources/registries/" + protocolVersion + "/extended.json");
-                if(extendedRegistry.exists()){
-                    String extendedRegistryStr = readFile(extendedRegistry.getAbsolutePath());
-                    // extended registry first so that it take president in case of wanting to overwrite/patch registries
-                    minecraftRegistryStr = new JsonMerger<>(JSONObject.class).merge(extendedRegistryStr, minecraftRegistryStr).toString();
+                File extendedRegistryFile = new File("protocolize-data-bundle/src/main/resources/registries/" + protocolVersion + "/extended.json");
+                if(extendedRegistryFile.exists()){
+                    JsonObject extendedRegistry = JsonParser.parseString(readFile(extendedRegistryFile.getAbsolutePath())).getAsJsonObject();
+                    minecraftRegistry = jsonMerge(minecraftRegistry, extendedRegistry);
                 }
 
-                registry = GSON.fromJson(minecraftRegistryStr, Registries.class);
+                registry = GSON.fromJson(minecraftRegistry, Registries.class);
                 parsedRegistries.put(protocolVersion, registry);
                 return registry;
-            } catch (Exception ignored){
-                getLog().warn("Failed to get registry for version " + protocolVersion);
+            } catch (Exception e){
+                getLog().warn("Failed to get registry for version " + protocolVersion, e);
             }
         }
         return null;
@@ -153,6 +152,29 @@ public class ProtocolizeDataMojo extends AbstractMojo {
             getLog().warn("Failed to read file " + path);
             return "";
         }
+    }
+
+    private static JsonObject jsonMerge(JsonObject jsonA, JsonObject jsonB) {
+        for (Map.Entry<String, JsonElement> sourceEntry : jsonA.entrySet()) {
+            String key = sourceEntry.getKey();
+            JsonElement value = sourceEntry.getValue();
+            if (!jsonB.has(key)) {
+                if (!value.isJsonNull()) {
+                    jsonB.add(key, value);
+                }
+            } else {
+                if (!value.isJsonNull()) {
+                    if (value.isJsonObject()) {
+                        jsonMerge(value.getAsJsonObject(), jsonB.get(key).getAsJsonObject());
+                    } else {
+                        jsonB.add(key, value);
+                    }
+                } else {
+                    jsonB.remove(key);
+                }
+            }
+        }
+        return jsonB;
     }
 
 }
