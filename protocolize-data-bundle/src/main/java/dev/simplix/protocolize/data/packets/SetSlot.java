@@ -86,13 +86,13 @@ public class SetSlot extends AbstractPacket {
         sb.append("SetSlot:");
         try {
             this.windowId = (protocolVersion >= MINECRAFT_1_21_2) ? ProtocolUtil.readVarInt(buf) : buf.readByte();
-            sb.append("\n    Window ID: 0x").append(Integer.toHexString(this.windowId));
+            sb.append("\n    Window ID: 0x").append(Integer.toHexString(this.windowId).toUpperCase());
             if (protocolVersion >= MINECRAFT_1_17_1) {
                 this.stateId = ProtocolUtil.readVarInt(buf);
-                sb.append("\n    State ID: 0x").append(Integer.toHexString(this.stateId));
+                sb.append("\n    State ID: 0x").append(Integer.toHexString(this.stateId).toUpperCase());
             }
             this.slot = buf.readShort();
-            sb.append("\n    Slot: 0x").append(Integer.toHexString(this.slot));
+            sb.append("\n    Slot: 0x").append(Integer.toHexString(this.slot).toUpperCase());
 
             byte[] data = new byte[buf.readableBytes()];
             buf.readBytes(data);

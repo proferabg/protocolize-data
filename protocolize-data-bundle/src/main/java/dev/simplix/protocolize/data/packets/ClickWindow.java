@@ -2,12 +2,15 @@ package dev.simplix.protocolize.data.packets;
 
 import dev.simplix.protocolize.api.ClickType;
 import dev.simplix.protocolize.api.PacketDirection;
+import dev.simplix.protocolize.api.item.HashedStack;
+import dev.simplix.protocolize.api.item.HashedStackSerializer;
 import dev.simplix.protocolize.api.item.ItemStack;
 import dev.simplix.protocolize.api.item.ItemStackSerializer;
 import dev.simplix.protocolize.api.mapping.AbstractProtocolMapping;
 import dev.simplix.protocolize.api.mapping.ProtocolIdMapping;
 import dev.simplix.protocolize.api.packet.AbstractPacket;
 import dev.simplix.protocolize.api.util.DebugUtil;
+import dev.simplix.protocolize.api.util.Either;
 import dev.simplix.protocolize.api.util.ProtocolUtil;
 import dev.simplix.protocolize.api.util.exception.ExceptionUtil;
 import dev.simplix.protocolize.api.util.exception.ProtocolizeException;
@@ -58,13 +61,13 @@ public class ClickWindow extends AbstractPacket {
         AbstractProtocolMapping.rangedIdMapping(MINECRAFT_1_21_6, MINECRAFT_LATEST, 0x11)
     );
 
-    private Map<Short, ItemStack> slotData = new HashMap<>();
+    private Map<Short, Either<ItemStack, HashedStack>> slotData = new HashMap<>();
     private int windowId;
     private int actionNumber;
     private short slot;
     private byte button;
     private int mode;
-    private ItemStack itemStack;
+    private Either<ItemStack, HashedStack> itemStack;
 
     /**
      * @since 1.7.1-SNAPSHOT protocol 756
@@ -82,33 +85,41 @@ public class ClickWindow extends AbstractPacket {
         sb.append("ClickWindow:");
         try {
             this.windowId = (protocolVersion >= MINECRAFT_1_21_2) ? ProtocolUtil.readVarInt(buf) : buf.readUnsignedByte();
-            sb.append("\n    Window ID: 0x").append(Integer.toHexString(this.windowId));
+            sb.append("\n    Window ID: 0x").append(Integer.toHexString(this.windowId).toUpperCase());
             if (protocolVersion >= MINECRAFT_1_17_1) {
                 this.stateId = ProtocolUtil.readVarInt(buf);
-                sb.append("\n    State ID: 0x").append(Integer.toHexString(this.stateId));
+                sb.append("\n    State ID: 0x").append(Integer.toHexString(this.stateId).toUpperCase());
             }
             this.slot = buf.readShort();
-            sb.append("\n    Slot: 0x").append(Integer.toHexString(this.slot));
+            sb.append("\n    Slot: 0x").append(Integer.toHexString(this.slot).toUpperCase());
             this.button = buf.readByte();
-            sb.append("\n    Button: 0x").append(Integer.toHexString(this.button));
+            sb.append("\n    Button: 0x").append(Integer.toHexString(this.button).toUpperCase());
             if (protocolVersion < MINECRAFT_1_17) {
                 this.actionNumber = buf.readShort();
-                sb.append("\n    Action: 0x").append(Integer.toHexString(this.actionNumber));
+                sb.append("\n    Action: 0x").append(Integer.toHexString(this.actionNumber).toUpperCase());
             }
             if (protocolVersion == MINECRAFT_1_8) {
                 this.mode = buf.readByte();
             } else {
                 this.mode = ProtocolUtil.readVarInt(buf);
             }
-            sb.append("\n    Mode: 0x").append(Integer.toHexString(this.mode));
+            sb.append("\n    Mode: 0x").append(Integer.toHexString(this.mode).toUpperCase());
             if (protocolVersion >= MINECRAFT_1_17) {
                 int length = ProtocolUtil.readVarInt(buf);
-                sb.append("\n    Slots: 0x").append(Integer.toHexString(length));
+                sb.append("\n    Slots: 0x").append(Integer.toHexString(length).toUpperCase());
                 for (int i = 0; i < length; i++) {
-                    this.slotData.put(buf.readShort(), ItemStackSerializer.read(buf, protocolVersion));
+                    if(protocolVersion >= MINECRAFT_1_21_5){
+                        this.slotData.put(buf.readShort(), Either.right(HashedStackSerializer.read(buf, protocolVersion)));
+                    } else {
+                        this.slotData.put(buf.readShort(), Either.left(ItemStackSerializer.read(buf, protocolVersion)));
+                    }
                 }
             }
-            this.itemStack = ItemStackSerializer.read(buf, protocolVersion);
+            if(protocolVersion >= MINECRAFT_1_21_5){
+                this.itemStack = Either.right(HashedStackSerializer.read(buf, protocolVersion));
+            } else {
+                this.itemStack = Either.left(ItemStackSerializer.read(buf, protocolVersion));
+            }
         } catch (Exception e) {
             if(DebugUtil.enabled) log.info(sb.toString());
             if(ExceptionUtil.getRootCause(e) instanceof ProtocolizeException){
@@ -149,13 +160,21 @@ public class ClickWindow extends AbstractPacket {
             ProtocolUtil.writeVarInt(buf, this.slotData.size());
             for (short slot : this.slotData.keySet()) {
                 buf.writeShort(slot);
-                ItemStackSerializer.write(buf, this.slotData.get(slot), protocolVersion);
+                if(protocolVersion >= MINECRAFT_1_21_5){
+                    HashedStackSerializer.write(buf, this.slotData.get(slot).getRight(), protocolVersion);
+                } else {
+                    ItemStackSerializer.write(buf, this.slotData.get(slot).getLeft(), protocolVersion);
+                }
             }
         }
-        if (this.itemStack == null) {
-            ItemStackSerializer.write(buf, ItemStack.NO_DATA, protocolVersion);
+        if(protocolVersion >= MINECRAFT_1_21_5){
+            HashedStackSerializer.write(buf, this.itemStack.getRight(), protocolVersion);
         } else {
-            ItemStackSerializer.write(buf, this.itemStack, protocolVersion);
+            if (this.itemStack.isLeft() && this.itemStack.getLeft() == null) {
+                ItemStackSerializer.write(buf, ItemStack.NO_DATA, protocolVersion);
+            } else {
+                ItemStackSerializer.write(buf, this.itemStack.getLeft(), protocolVersion);
+            }
         }
     }
 

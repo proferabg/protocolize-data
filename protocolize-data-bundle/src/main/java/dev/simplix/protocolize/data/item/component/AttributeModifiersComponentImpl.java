@@ -49,7 +49,7 @@ public class AttributeModifiersComponentImpl implements AttributeModifiersCompon
             }
             AttributeModifier modifier = new AttributeModifier();
             modifier.setId(ProtocolUtil.readString(byteBuf));
-            modifier.setAmount(new MinMaxBounds<>(byteBuf.readDouble()));
+            modifier.setAmount(byteBuf.readDouble());
             modifier.setOperation(AttributeModifier.Operation.values()[ProtocolUtil.readVarInt(byteBuf)]);
             attributeModifier.setModifier(modifier);
             attributeModifier.setSlot(EquipmentSlotGroup.values()[ProtocolUtil.readVarInt(byteBuf)]);
@@ -91,7 +91,7 @@ public class AttributeModifiersComponentImpl implements AttributeModifiersCompon
                 ProtocolUtil.writeUniqueId(byteBuf, attributeModifier.getUuid());
             }
             ProtocolUtil.writeString(byteBuf, attributeModifier.getModifier().getId());
-            byteBuf.writeDouble(attributeModifier.getModifier().getAmount().getExact());
+            byteBuf.writeDouble(attributeModifier.getModifier().getAmount());
             ProtocolUtil.writeVarInt(byteBuf, attributeModifier.getModifier().getOperation().ordinal());
             ProtocolUtil.writeVarInt(byteBuf, attributeModifier.getSlot().ordinal());
             if(protocolVersion >= ProtocolVersions.MINECRAFT_1_21_6) {

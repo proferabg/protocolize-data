@@ -28,14 +28,15 @@ public final class StructuredItemStackSerializer {
     public ItemStack read(ByteBuf buf, int protocolVersion) {
         StringBuilder sb = new StringBuilder();
         sb.append("StructuredItemStackSerializer:");
+        sb.append("\n    Available Bytes: 0x").append(Integer.toHexString(buf.readableBytes()).toUpperCase());
         try {
             int amount = ProtocolUtil.readVarInt(buf);
-            sb.append("\n    Amount: 0x").append(Integer.toHexString(amount));
+            sb.append("\n    Item Count: 0x").append(Integer.toHexString(amount).toUpperCase());
             if (amount == 0) {
                 return ItemStack.NO_DATA;
             }
             int itemId = ProtocolUtil.readVarInt(buf);
-            sb.append("\n    Item ID: 0x").append(Integer.toHexString(itemId));
+            sb.append("\n    Item ID: 0x").append(Integer.toHexString(itemId).toUpperCase());
             ItemType type = findItemType(itemId, protocolVersion);
             if (type == null && !UNKNOWN_ITEMS.contains(itemId)) { //prevent console spam by checking if already logged
                 UNKNOWN_ITEMS.add(itemId);
@@ -43,9 +44,9 @@ public final class StructuredItemStackSerializer {
             }
             sb.append("\n    Item Type: ").append(type != null ? type.name() : "null");
             int toAdd = ProtocolUtil.readVarInt(buf);
-            sb.append("\n    Components(+): 0x").append(Integer.toHexString(toAdd));
+            sb.append("\n    Components(+): 0x").append(Integer.toHexString(toAdd).toUpperCase());
             int toRemove = ProtocolUtil.readVarInt(buf);
-            sb.append("\n    Components(-): 0x").append(Integer.toHexString(toRemove));
+            sb.append("\n    Components(-): 0x").append(Integer.toHexString(toRemove).toUpperCase());
             List<DataComponent> componentsToAdd = new ArrayList<>(toAdd);
             List<DataComponentType<?>> componentsToRemove = new ArrayList<>(toRemove);
             for (int i = 0; i < toAdd; i++) {
@@ -149,7 +150,7 @@ public final class StructuredItemStackSerializer {
 
     private DataComponentType<?> readComponentType(ByteBuf buf, int protocolVersion, StringBuilder sb) {
         int componentId = ProtocolUtil.readVarInt(buf);
-        sb.append("\n    Component ID: 0x").append(Integer.toHexString(componentId));
+        sb.append("\n    Component ID: 0x").append(Integer.toHexString(componentId).toUpperCase());
         return findComponentType(componentId, protocolVersion);
     }
 
@@ -165,7 +166,7 @@ public final class StructuredItemStackSerializer {
         throw new InvalidDataComponentTypeException(componentId, protocolVersion);
     }
 
-    private ItemType findItemType(int id, int protocolVersion) {
+    public static ItemType findItemType(int id, int protocolVersion) {
         Multimap<ItemType, ProtocolMapping> mappings = MAPPING_PROVIDER.mappings(ItemType.class, protocolVersion);
         for (ItemType type : mappings.keySet()) {
             for (ProtocolMapping mapping : mappings.get(type)) {

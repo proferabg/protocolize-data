@@ -91,15 +91,15 @@ public class WindowItems extends AbstractPacket {
         sb.append("WindowItems:");
         try {
             this.windowId = (protocolVersion >= MINECRAFT_1_21_2) ? ProtocolUtil.readVarInt(buf) : buf.readUnsignedByte();
-            sb.append("\n    Window ID: 0x").append(Integer.toHexString(this.windowId));
+            sb.append("\n    Window ID: 0x").append(Integer.toHexString(this.windowId).toUpperCase());
             if (protocolVersion >= MINECRAFT_1_17_1) {
                 this.stateId = ProtocolUtil.readVarInt(buf);
-                sb.append("\n    State ID: 0x").append(Integer.toHexString(this.stateId));
+                sb.append("\n    State ID: 0x").append(Integer.toHexString(this.stateId).toUpperCase());
                 this.count = ProtocolUtil.readVarInt(buf);
             } else {
                 this.count = buf.readShort();
             }
-            sb.append("\n    Count: 0x").append(Integer.toHexString(this.count));
+            sb.append("\n    Count: 0x").append(Integer.toHexString(this.count).toUpperCase());
 
             byte[] data = new byte[buf.readableBytes()];
             buf.readBytes(data);

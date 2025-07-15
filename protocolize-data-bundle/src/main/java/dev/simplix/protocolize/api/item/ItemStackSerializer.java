@@ -89,7 +89,7 @@ public final class ItemStackSerializer {
             out.hideFlags(readHideFlags(tag));
             return out;
         } catch (Exception e) {
-            DebugUtil.writeDump(buf, e);
+            DebugUtil.writeDump(buf, "itemstack", e);
             throw e;
         }
     }

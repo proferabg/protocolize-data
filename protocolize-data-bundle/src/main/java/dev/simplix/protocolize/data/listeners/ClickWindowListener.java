@@ -67,9 +67,10 @@ public final class ClickWindowListener extends AbstractPacketListener<ClickWindo
         if (event.player().registeredInventories().get(clickWindow.windowId()) == null) {
             return; // Inv maybe closed during click handle
         }
-        if (click.cancelled()) {
+        if (click.cancelled() && clickWindow.itemStack().isLeft()) {
             // Reset the clicked slot
-            event.player().sendPacket(new SetSlot((byte) clickWindow.windowId(), clickWindow.slot(), clickWindow.itemStack(), clickWindow.stateId()));
+            // TODO: verify for 1.21.5+ as clickWindow does not send serialized itemstack anymore
+            event.player().sendPacket(new SetSlot((byte) clickWindow.windowId(), clickWindow.slot(), clickWindow.itemStack().getLeft(), clickWindow.stateId()));
         }
         if (inventory.type() != InventoryType.PLAYER) {
             event.player().openInventory(inventory);
