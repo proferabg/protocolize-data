@@ -107,6 +107,7 @@ public final class StructuredItemStackSerializer {
     private void writeComponent(ByteBuf buf, DataComponent component, int protocolVersion) {
         writeComponentType(buf, component.getType(), protocolVersion);
         try {
+            if(DebugUtil.logComponents) log.info("Writing component {}", component.getClass().getSimpleName());
             component.write(buf, protocolVersion);
         } catch (Exception e) {
             throw new RuntimeException("Unable to write " + component.getClass().getSimpleName() + " of item", e);
@@ -141,6 +142,7 @@ public final class StructuredItemStackSerializer {
         sb.append("\n    Component Type: ").append(type.getName());
         DataComponent component = type.createEmpty();
         try {
+            if(DebugUtil.logComponents) log.info("Reading component {}", component.getClass().getSimpleName());
             component.read(buf, protocolVersion);
         } catch (Exception e) {
             throw new RuntimeException("Unable to read '" + component.getType().getName() + "' data component for item at protocol version " + protocolVersion, e);

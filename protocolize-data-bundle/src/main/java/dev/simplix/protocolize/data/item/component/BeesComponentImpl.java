@@ -13,14 +13,11 @@ import net.querz.nbt.tag.CompoundTag;
 import java.util.ArrayList;
 import java.util.List;
 
-
 @Data
 @AllArgsConstructor
 public class BeesComponentImpl implements BeesComponent {
 
     private List<Bee> bees;
-
-    // TODO: CHECK
 
     @Override
     public void read(ByteBuf byteBuf, int protocolVersion) throws Exception {
@@ -30,6 +27,7 @@ public class BeesComponentImpl implements BeesComponent {
             bee.setEntityData((CompoundTag) NamedBinaryTagUtil.readTag(byteBuf, protocolVersion));
             bee.setTicksInHive(ProtocolUtil.readVarInt(byteBuf));
             bee.setMinTicksInHive(ProtocolUtil.readVarInt(byteBuf));
+            bees.add(bee);
         }
     }
 
@@ -77,12 +75,10 @@ public class BeesComponentImpl implements BeesComponent {
             return "minecraft:bees";
         }
 
-
         @Override
         public BeesComponent createEmpty() {
             return new BeesComponentImpl(new ArrayList<>(0));
         }
 
     }
-
 }
